@@ -3,7 +3,7 @@ name = "django-drf"
 version = "0.1.0"
 description = ""
 authors = [
-    {name = "Kseniia Vakhterova",email = "vlsen23@list.ru"}
+    {name = "Kseniia Vakhterova",email = "vksen23@list.ru"}
 ]
 requires-python = ">=3.14"
 dependencies = [
