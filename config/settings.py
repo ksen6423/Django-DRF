@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 
-from django.conf.global_settings import DEFAULT_AUTO_FIELD, MEDIA_URL, MEDIA_ROOT
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
