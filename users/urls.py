@@ -7,7 +7,7 @@ from users.views import UserRetrieveUpdateAPIView, UserViewSet
 app_name = UsersConfig.name
 
 router = SimpleRouter()
-router.register(r'users', UserViewSet, basename='user')
+router.register(r"users", UserViewSet, basename="user")
 
 urlpatterns = [
     path("users/profile/", UserRetrieveUpdateAPIView.as_view(), name="users_profile"),
