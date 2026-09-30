@@ -1,4 +1,5 @@
-from rest_framework.generics import RetrieveUpdateAPIView
+from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView
+from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import generics
 from rest_framework.filters import OrderingFilter
@@ -14,6 +15,17 @@ class UserViewSet(ModelViewSet):
     serializer_class = UserSerializer
 
 
+class UserCreateAPIView(CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (AllowAny,)
+
+    def perform_create(self, serializer):
+        user = serializer.save(is_active=True)
+        user.set_password(user.password)
+        user.save()
+
+
 class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -25,6 +37,6 @@ class PaymentListView(generics.ListAPIView):
 
     filter_backends = [DjangoFilterBackend, OrderingFilter]
 
-    filterset_fields = ['course', 'lesson', 'payment_method']
+    filterset_fields = ["course", "lesson", "payment_method"]
 
-    ordering_fields = ['payment_date']
+    ordering_fields = ["payment_date"]
