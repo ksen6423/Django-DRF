@@ -1,4 +1,5 @@
 from rest_framework import permissions
+from rest_framework.permissions import BasePermission
 
 
 class IsModer(permissions.BasePermission):
@@ -13,3 +14,8 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
         if obj.owner == request.user:
             return True
         return False
+
+
+class IsNotModerator(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return not IsModer().has_permission(request, view)
