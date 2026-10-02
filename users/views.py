@@ -20,6 +20,9 @@ class UserCreateAPIView(CreateAPIView):
     serializer_class = UserSerializer
     permission_classes = (AllowAny,)
 
+    def get_object(self):
+        return self.request.user
+
     def perform_create(self, serializer):
         user = serializer.save(is_active=True)
         user.set_password(user.password)
