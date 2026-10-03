@@ -17,5 +17,5 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
 
 
 class IsNotModerator(BasePermission):
-    def has_object_permission(self, request, view, obj):
-        return not IsModer().has_permission(request, view)
+    def has_permission(self, request, view):
+        return not request.user.groups.filter(name="moders").exists()
