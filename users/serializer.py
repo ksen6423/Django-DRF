@@ -13,10 +13,23 @@ class UserSerializer(ModelSerializer):
             'password': {'write_only': True},
         }
 
-        def validate_email(self, value):
-            if User.objects.filter(email__iexact=value).exists():
-                raise serializers.ValidationError("Пользователь с таким Email уже существует.")
-            return value
+    def validate_email(self, value):
+        queryset = User.objects.filter(email__iexact=value)
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+        if queryset.exists():
+            raise serializers.ValidationError(
+                "Пользователь с таким Email уже существует."
+            )
+        return value.lower()
+
+    def update(self, instance, validated_data):
+        password = validated_data.pop("password", None)
+        user = super().update(instance, validated_data)
+        if password:
+            user.set_password(password)
+            user.save(update_fields=["password"])
+        return user
 
 
 class PaymentSerializer(ModelSerializer):

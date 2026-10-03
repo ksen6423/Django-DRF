@@ -1,5 +1,5 @@
 from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import generics
 from rest_framework.filters import OrderingFilter
@@ -30,8 +30,11 @@ class UserCreateAPIView(CreateAPIView):
 
 
 class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
-    queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
 
 
 class PaymentListView(generics.ListAPIView):

@@ -15,12 +15,22 @@ from materials.serializer import (
     LessonSerializer,
     CourseDetailSerializer,
 )
-from users.permissions import IsModer, IsOwnerOrReadOnly
+from users.permissions import (
+    IsModer,
+    IsNotModerator,
+    IsOwnerOrReadOnly,
+)
 
 
 class CourseViewSet(ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.groups.filter(name="moders").exists():
+            return Course.objects.all()
+        return Course.objects.filter(owner=user)
 
     def get_serializer_class(self):
         if self.action == "retrieve":
@@ -34,45 +44,58 @@ class CourseViewSet(ModelViewSet):
         return Response(serializer.data, status=201)
 
     def get_permissions(self):
-        if self.action in ('update', 'partial_update'):
-            return [IsAuthenticated(), IsOwnerOrReadOnly()]
-        if self.action == 'create':
-            return [IsAuthenticated()]
-        if self.action == 'destroy':
+        if self.action == "create":
+            return [IsAuthenticated(), IsNotModerator()]
+        if self.action in ("update", "partial_update"):
+            return [
+                IsAuthenticated(),
+                (IsModer | IsOwnerOrReadOnly)(),
+            ]
+        if self.action == "destroy":
             return [IsAuthenticated(), IsOwnerOrReadOnly()]
         return [IsAuthenticated()]
+
+
+
+class LessonQuerysetMixin:
+    def get_queryset(self):
+        user = self.request.user
+        if user.groups.filter(name="moders").exists():
+            return Lesson.objects.all()
+        return Lesson.objects.filter(owner=user)
 
 
 class LessonCreateApiView(CreateAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
-    permission_classes = (~IsModer, IsAuthenticated)
+    permission_classes = [IsAuthenticated, IsNotModerator]
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+    def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
-        return Response(serializer.data, status=201)
+    #
+    # def create(self, request, *args, **kwargs):
+    #     serializer = self.get_serializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save(owner=self.request.user)
+    #     return Response(serializer.data, status=201)
 
 
-class LessonListApiView(ListAPIView):
-    queryset = Lesson.objects.all()
+class LessonListApiView(LessonQuerysetMixin, ListAPIView):
     serializer_class = LessonSerializer
 
 
-class LessonRetrieveAPIView(RetrieveAPIView):
+class LessonRetrieveAPIView(LessonQuerysetMixin, RetrieveAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
-    permission_classes = (IsAuthenticated, IsModer | IsOwnerOrReadOnly)
+    permission_classes = [IsAuthenticated, IsModer | IsOwnerOrReadOnly]
 
 
-class LessonUpdateAPIView(UpdateAPIView):
-    queryset = Lesson.objects.all()
+class LessonUpdateAPIView(LessonQuerysetMixin, UpdateAPIView):
     serializer_class = LessonSerializer
-    permission_classes = (IsAuthenticated, IsModer | IsOwnerOrReadOnly)
+    permission_classes = [IsAuthenticated, IsModer | IsOwnerOrReadOnly]
 
 
-class LessonDestroyAPIView(DestroyAPIView):
-    queryset = Lesson.objects.all()
+class LessonDestroyAPIView(LessonQuerysetMixin, DestroyAPIView):
     serializer_class = LessonSerializer
     permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+

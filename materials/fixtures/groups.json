@@ -4,12 +4,7 @@
     "pk": 1,
     "fields": {
       "name": "moders",
-      "permissions": [
-        "auth.add_group",
-        "auth.change_group",
-        "auth.delete_group",
-        "auth.view_group"
-      ]
+      "permissions": []
     }
   }
 ]
