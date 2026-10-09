@@ -72,12 +72,6 @@ class LessonCreateApiView(CreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
-    #
-    # def create(self, request, *args, **kwargs):
-    #     serializer = self.get_serializer(data=request.data)
-    #     serializer.is_valid(raise_exception=True)
-    #     serializer.save(owner=self.request.user)
-    #     return Response(serializer.data, status=201)
 
 
 class LessonListApiView(LessonQuerysetMixin, ListAPIView):
@@ -98,4 +92,3 @@ class LessonUpdateAPIView(LessonQuerysetMixin, UpdateAPIView):
 class LessonDestroyAPIView(LessonQuerysetMixin, DestroyAPIView):
     serializer_class = LessonSerializer
     permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
-
