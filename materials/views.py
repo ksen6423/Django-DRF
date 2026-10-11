@@ -1,5 +1,7 @@
+from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.generics import (
     CreateAPIView,
@@ -9,7 +11,8 @@ from rest_framework.generics import (
     DestroyAPIView,
 )
 
-from materials.models import Course, Lesson
+from materials.models import Course, Lesson, CourseSubscription
+from materials.paginators import CustomPagination
 from materials.serializer import (
     CourseSerializer,
     LessonSerializer,
@@ -25,6 +28,7 @@ from users.permissions import (
 class CourseViewSet(ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
+    pagination_class = CustomPagination
 
     def get_queryset(self):
         user = self.request.user
@@ -56,7 +60,6 @@ class CourseViewSet(ModelViewSet):
         return [IsAuthenticated()]
 
 
-
 class LessonQuerysetMixin:
     def get_queryset(self):
         user = self.request.user
@@ -76,6 +79,7 @@ class LessonCreateApiView(CreateAPIView):
 
 class LessonListApiView(LessonQuerysetMixin, ListAPIView):
     serializer_class = LessonSerializer
+    pagination_class = CustomPagination
 
 
 class LessonRetrieveAPIView(LessonQuerysetMixin, RetrieveAPIView):
@@ -92,3 +96,19 @@ class LessonUpdateAPIView(LessonQuerysetMixin, UpdateAPIView):
 class LessonDestroyAPIView(LessonQuerysetMixin, DestroyAPIView):
     serializer_class = LessonSerializer
     permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+
+
+class CourseSubscriptionView(APIView):
+    def post(self, request):
+        user = request.user
+        course_id = request.data.get('course_id')
+        course = get_object_or_404(Course, id=course_id)
+
+        subs = CourseSubscription.objects.filter(user=user, course=course)
+        if subs.exists():
+            subs.delete()
+            message = 'подписка удалена'
+        else:
+            CourseSubscription.objects.create(user=user, course=course)
+            message = 'подписка добавлена'
+        return Response({"message": message})

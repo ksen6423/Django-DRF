@@ -34,6 +34,28 @@ class Course(models.Model):
         return self.name
 
 
+class CourseSubscription(models.Model):
+    user_subscription = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        verbose_name="Пользователь",
+    )
+
+    course_subscription = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        verbose_name="Курс",
+    )
+
+    class Meta:
+        verbose_name = "Подписка"
+        verbose_name_plural = "Подписки"
+        ordering = ["user_subscription", "course_subscription"]
+
+    def __str__(self):
+        return self.user_subscription
+
+
 class Lesson(models.Model):
     name = models.CharField(
         max_length=50,
