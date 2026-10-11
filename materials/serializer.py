@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
-from materials.models import Course, Lesson
+from materials.models import Course, Lesson, CourseSubscription
+from materials.validators import validate_no_external_links
 
 
 class CourseSerializer(ModelSerializer):
@@ -11,9 +12,11 @@ class CourseSerializer(ModelSerializer):
 
 
 class LessonSerializer(ModelSerializer):
+    video_url = serializers.URLField(validators=[validate_no_external_links], required=False, allow_blank=True)
+
     class Meta:
         model = Lesson
-        fields = "__all__"
+        fields = ["id", "name", "description", "course", "video_url"]
 
 
 class CourseDetailSerializer(serializers.ModelSerializer):
@@ -26,3 +29,16 @@ class CourseDetailSerializer(serializers.ModelSerializer):
 
     def get_lesson_count(self, obj):
         return obj.lessons.count()
+
+
+class CourseSubscriptionSerializer(serializers.ModelSerializer):
+    is_subscribed = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CourseSubscription
+        fields = ['user_subscription', 'course_subscription', 'is_subscribed']
+
+    def get_is_subscribed(self, obj):
+        user = self.context['request'].user
+        course = obj.course_subscription
+        return CourseSubscription.objects.filter(user_subscription=user, course_subscription=course).exists()

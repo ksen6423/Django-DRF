@@ -19,3 +19,14 @@ pip install -r requirements.txt
 
 
 ## Тестирование
+
+Запуск тестов с помощью unittest (встроенный фреймворк)
+1. import unittest
+2. python manage.py test
+
+Подсчет покрытия тестами
+1. Установка специального пакета coverage - pip install coverage
+2. Запуск подсчета покрытия тестами - coverage run --source='.' manage.py test
+3. Вывод отчета о покрытии тестами - coverage report
+
+Общее покрытие тестами 81%
