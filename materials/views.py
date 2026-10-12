@@ -99,16 +99,17 @@ class LessonDestroyAPIView(LessonQuerysetMixin, DestroyAPIView):
 
 
 class CourseSubscriptionView(APIView):
-    def post(self, request):
-        user = request.user
-        course_id = request.data.get('course_id')
-        course = get_object_or_404(Course, id=course_id)
+    permission_classes = [IsAuthenticated]
 
-        subs = CourseSubscription.objects.filter(user=user, course=course)
-        if subs.exists():
-            subs.delete()
-            message = 'подписка удалена'
-        else:
-            CourseSubscription.objects.create(user=user, course=course)
-            message = 'подписка добавлена'
-        return Response({"message": message})
+    def post(self, request, *args, **kwargs):
+        course = get_object_or_404(Course, pk=request.data.get("course_id"))
+        subscription, created = CourseSubscription.objects.get_or_create(
+            user=request.user,
+            course=course,
+        )
+
+        if created:
+            return Response({"message": "Подписка добавлена"}, status=201)
+
+        subscription.delete()
+        return Response({"message": "Подписка удалена"}, status=200)

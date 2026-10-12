@@ -35,26 +35,56 @@ class Course(models.Model):
 
 
 class CourseSubscription(models.Model):
-    user_subscription = models.ForeignKey(
+    user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
+        related_name="course_subscriptions",
         verbose_name="Пользователь",
+        default=1
     )
-
-    course_subscription = models.ForeignKey(
+    course = models.ForeignKey(
         Course,
         on_delete=models.CASCADE,
+        related_name="subscriptions",
         verbose_name="Курс",
+        default=1
     )
 
     class Meta:
         verbose_name = "Подписка"
         verbose_name_plural = "Подписки"
-        ordering = ["user_subscription", "course_subscription"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=("user", "course"),
+                name="unique_user_course_subscription",
+            )
+        ]
 
-    def __str__(self):
-        return self.user_subscription
+    def __str__(self) -> str:
+        return f"{self.user} — {self.course}"
 
+
+# class CourseSubscription(models.Model):
+#     user_subscription = models.ForeignKey(
+#         settings.AUTH_USER_MODEL,
+#         on_delete=models.CASCADE,
+#         verbose_name="Пользователь",
+#     )
+#
+#     course_subscription = models.ForeignKey(
+#         Course,
+#         on_delete=models.CASCADE,
+#         verbose_name="Курс",
+#     )
+#
+#     class Meta:
+#         verbose_name = "Подписка"
+#         verbose_name_plural = "Подписки"
+#         ordering = ["user_subscription", "course_subscription"]
+#
+#     def __str__(self):
+#         return self.user_subscription
+#
 
 class Lesson(models.Model):
     name = models.CharField(
