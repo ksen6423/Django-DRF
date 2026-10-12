@@ -3,7 +3,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.routers import SimpleRouter
 
 from users.apps import UsersConfig
-from users.views import UserRetrieveUpdateAPIView, UserViewSet, UserCreateAPIView
+from users.views import UserRetrieveUpdateAPIView, UserViewSet, UserCreateAPIView, CoursePaymentCreateAPIView
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -29,4 +29,5 @@ urlpatterns = [
         name="token_refresh",
     ),
     path('', include(router.urls)),
+    path("coursepayment/", CoursePaymentCreateAPIView.as_view(), name="coursepayment")
 ]
