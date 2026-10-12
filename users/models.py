@@ -63,3 +63,35 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.amount} - {self.payment_method}"
+
+
+class CoursePayment(models.Model):
+    amount = models.PositiveIntegerField(
+        verbose_name="Оплата курса",
+    )
+    session_id = models.CharField(
+        max_length=250,
+        blank=True,
+        null=True,
+        verbose_name="Id сессии",
+    )
+    link = models.URLField(
+        max_length=400,
+        blank=True,
+        null=True,
+        verbose_name="Ссылка на оплату",
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        verbose_name="Пользователь",
+    )
+
+    class Meta:
+        verbose_name = "Оплата"
+        verbose_name_plural = "Оплаты"
+
+    def __str__(self):
+        return self.amount
