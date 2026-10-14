@@ -66,6 +66,11 @@ class Payment(models.Model):
 
 
 class CoursePayment(models.Model):
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.PROTECT,
+        verbose_name="Курс",
+    )
     amount = models.PositiveIntegerField(
         verbose_name="Оплата курса",
     )
@@ -94,4 +99,4 @@ class CoursePayment(models.Model):
         verbose_name_plural = "Оплаты"
 
     def __str__(self):
-        return self.amount
+        return f"Оплата курса: {self.amount}"
