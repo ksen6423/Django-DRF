@@ -3,14 +3,23 @@ from config.settings import STRIPE_API_KEY
 
 stripe.api_key = STRIPE_API_KEY
 
-def create_stripe_price(amount):
-    """Создает цену в страйпе."""
-    return stripe.Price.create(
-        currency="rub",
-        unit_amount=amount * 100,
-        recurring={"interval": "month"},
-        product_data={"name": "CoursePayment"},
+
+def create_stripe_product(course):
+    product = stripe.Product.create(
+        name=course.title,
+        description=course.description,
     )
+    return product.id
+
+
+def create_stripe_price(product_id: str, amount: int) -> str:
+    price = stripe.Price.create(
+        product=product_id,
+        unit_amount=amount,
+        currency="usd",
+    )
+    return price.id
+
 
 def create_stripe_session(price):
     """Создает сессию на оплату в страйпе."""
