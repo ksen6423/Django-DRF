@@ -130,15 +130,15 @@ CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 
-CELERY_BROKER_URL = "redis://localhost:6379/0"
-CELERY_BROKER_BACKEND = "redis://localhost:6379/0"
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
+CELERY_BROKER_BACKEND = os.getenv("CELERY_BROKER_BACKEND", "redis://localhost:6379/0")
 
 MAILERS = {
     "default": {
         "BACKEND": "django.core.mail.backends.smtp.EmailBackend",
         "OPTIONS": {
             "host": "mail.example.net",
-            "username": "user@example.net",  # Обратите внимание: ключ называется 'username', а не 'host_user'
+            "username": "user@example.net",
             "password": "your-password",
             "port": 587,
             "use_tls": True,
@@ -146,6 +146,13 @@ MAILERS = {
     },
 }
 
-
 SERVER_EMAIL = MAILERS
 DEFAULT_FROM_EMAIL = MAILERS
+
+CELERY_BEAT_SCHEDULE = {
+    'run-every-30-seconds': {
+        'task': 'apps.tasks.my_periodic_task',
+        'schedule': 30.0,
+        'args': (10, 20),
+    }
+}

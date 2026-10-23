@@ -60,6 +60,23 @@ class CourseViewSet(ModelViewSet):
             return [IsAuthenticated(), IsOwnerOrReadOnly()]
         return [IsAuthenticated()]
 
+    def perform_update(self, serializer):
+        # 1. Сохраняем измененные данные курса
+        course = serializer.save()
+
+        # 2. Ищем подписчиков (исправлено: course.id вместо course_id)
+        subscribers = CourseSubscription.objects.filter(
+            course_id=course.id
+        ).select_related('user')
+
+        # 3. Отправляем уведомления
+        for subscription in subscribers:
+            send_course_update_email.delay(
+                email=subscription.user.email,
+                course_id=course.id,
+                course_name=course.name
+            )
+
 
 class LessonQuerysetMixin:
     def get_queryset(self):
@@ -114,23 +131,3 @@ class CourseSubscriptionView(APIView):
 
         subscription.delete()
         return Response({"message": "Подписка удалена"}, status=200)
-
-
-class CourseController:
-    def update_course(self, request, course_id):
-        course = Course.objects.get(id=course_id)
-        # ... обновление полей курса из request.data ...
-        course.save()
-
-        subscribers = CourseSubscription.objects.filter(
-            course_id=course_id
-        ).select_related('user')
-
-        for subscription in subscribers:
-            send_course_update_email.delay(
-                email=subscription.user.email,
-                course_id=course_id,
-                course_name=course.name
-            )
-
-        return Response({"status": "updated"}, status=200)
