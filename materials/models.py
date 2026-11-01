@@ -1,0 +1,119 @@
+from django.db import models
+
+from config import settings
+
+
+class Course(models.Model):
+    name = models.CharField(
+        max_length=50,
+        verbose_name="Название",
+        help_text="Введите название курса",
+    )
+    description = models.TextField(
+        verbose_name="Описание",
+        help_text="Введите описание курса",
+        blank=True,
+        null=True,
+    )
+    image = models.ImageField(
+        upload_to="course/photo",
+        blank=True,
+        null=True,
+        verbose_name="Фото",
+        help_text="Загрузите изображение",
+    )
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Владелец"
+    )
+
+    class Meta:
+        verbose_name = "Курс"
+        verbose_name_plural = "Курсы"
+
+    def __str__(self):
+        return self.name
+
+
+class CourseSubscription(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="course_subscriptions",
+        verbose_name="Пользователь",
+        default=1
+    )
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name="subscriptions",
+        verbose_name="Курс",
+        default=1
+    )
+
+    class Meta:
+        verbose_name = "Подписка"
+        verbose_name_plural = "Подписки"
+        constraints = [
+            models.UniqueConstraint(
+                fields=("user", "course"),
+                name="unique_user_course_subscription",
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.user} — {self.course}"
+
+
+# class CourseSubscription(models.Model):
+#     user_subscription = models.ForeignKey(
+#         settings.AUTH_USER_MODEL,
+#         on_delete=models.CASCADE,
+#         verbose_name="Пользователь",
+#     )
+#
+#     course_subscription = models.ForeignKey(
+#         Course,
+#         on_delete=models.CASCADE,
+#         verbose_name="Курс",
+#     )
+#
+#     class Meta:
+#         verbose_name = "Подписка"
+#         verbose_name_plural = "Подписки"
+#         ordering = ["user_subscription", "course_subscription"]
+#
+#     def __str__(self):
+#         return self.user_subscription
+#
+
+class Lesson(models.Model):
+    name = models.CharField(
+        max_length=50,
+        verbose_name="Название",
+        help_text="Введите название урока",
+    )
+    description = models.TextField(
+        verbose_name="Описание",
+        help_text="Введите описание урока",
+        blank=True,
+        null=True,
+    )
+    image = models.ImageField(
+        upload_to="lesson/photo",
+        blank=True,
+        null=True,
+        verbose_name="Фото",
+        help_text="Загрузите изображение",
+    )
+    video_url = models.URLField()
+    course = models.ForeignKey(Course, related_name="lessons", on_delete=models.CASCADE)
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Владелец"
+    )
+
+    class Meta:
+        verbose_name = "Урок"
+        verbose_name_plural = "Уроки"
+
+    def __str__(self):
+        return self.name
