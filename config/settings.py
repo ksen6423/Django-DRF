@@ -105,6 +105,7 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles",)
 
 MAILERS = {
     "default": {
@@ -154,5 +155,12 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'apps.tasks.my_periodic_task',
         'schedule': 30.0,
         'args': (10, 20),
+    }
+}
+
+CACHES= {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://redis:6379/1",
     }
 }
