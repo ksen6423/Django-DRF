@@ -2,8 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - main
+    branches: [main, develop, feature/server-deploy]
 
 jobs:
   test:
@@ -29,9 +28,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
       - name: Deploy to server
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -39,10 +35,11 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /home/${{ secrets.USERNAME }}/app
-            git pull origin main 
-            source venv/bin/activate 
-            pip install -r requirements.txt 
+            cd /home/${{ secrets.SSH_USERNAME }}/app
+            git fetch origin
+            git checkout -B ${{ github.ref_name }} origin/${{ github.ref_name }}
+            source venv/bin/activate
+            pip install -r requirements.txt
             python manage.py migrate
-            python manage.py collectstatic --noinput 
+            python manage.py collectstatic --noinput
             sudo systemctl restart gunicorn
