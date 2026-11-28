@@ -22,13 +22,22 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+      redis:
+        image: redis:7
+        ports: [ '6379:6379' ]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.14'
+          python-version: '3.12'
 
       - name: Install dependencies
         run: |
@@ -37,7 +46,7 @@ jobs:
 
       - name: Wait for PostgreSQL
         run: |
-          until pg_isready -h localhost -p 5432 -U test_user; do
+          until pg_isready -h localhost -p 5432 -U ${{ secrets.POSTGRES_USER }}; do
             sleep 1
           done
 
@@ -47,8 +56,22 @@ jobs:
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
-          POSTGRES_HOST: localhost
+          STRIPE_API_KEY: ${{ secrets.STRIPE_API_KEY }}
         run: |
+          cat <<EOF > .env
+          SECRET_KEY='$SECRET_KEY'
+          NAME=$POSTGRES_DB
+          USER=$POSTGRES_USER
+          PASSWORD='$PASSWORD'
+          HOST=localhost
+          PORT=5432
+          DEBUG=True
+          STRIPE_API_KEY=$STRIPE_API_KEY
+          CELERY_BROKER_URL=redis://localhost:6379/0
+          CELERY_BROKER_BACKEND=redis://localhost:6379/0
+          REDIS_CACHE_URL=redis://localhost:6379/1
+          EOF
+
           python manage.py migrate
           python manage.py test
 
