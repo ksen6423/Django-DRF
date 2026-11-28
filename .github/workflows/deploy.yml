@@ -87,11 +87,12 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /home/${{ secrets.SSH_USERNAME }}/app
-            git fetch origin
-            git checkout -B ${{ github.ref_name }} origin/${{ github.ref_name }}
-            source venv/bin/activate
-            pip install -r requirements.txt
-            python manage.py migrate
-            python manage.py collectstatic --noinput
-            sudo systemctl restart gunicorn
+            script: |
+              cd /home/${{ secrets.SSH_USERNAME }}/Django-DRF
+              git fetch origin
+              git checkout -B ${{ github.ref_name }} origin/${{ github.ref_name }}
+              source /home/${{ secrets.SSH_USERNAME }}/venv/bin/activate
+              pip install -r requirements.txt
+              python manage.py migrate
+              python manage.py collectstatic --noinput
+              sudo systemctl restart gunicorn
