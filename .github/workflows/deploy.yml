@@ -62,7 +62,7 @@ jobs:
           SECRET_KEY='$SECRET_KEY'
           NAME=$POSTGRES_DB
           USER=$POSTGRES_USER
-          PASSWORD='$PASSWORD'
+          PASSWORD='$POSTGRES_PASSWORD'
           HOST=localhost
           PORT=5432
           DEBUG=True
