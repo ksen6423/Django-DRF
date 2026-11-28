@@ -70,6 +70,8 @@ class CoursePayment(models.Model):
         Course,
         on_delete=models.PROTECT,
         verbose_name="Курс",
+        blank=True,
+        null=True,
     )
     amount = models.PositiveIntegerField(
         verbose_name="Оплата курса",
